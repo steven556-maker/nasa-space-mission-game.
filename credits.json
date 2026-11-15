@@ -1,0 +1,46 @@
+{
+  "project": {
+    "name": "NOVA Space Mission Design Game",
+    "team": "NOVA YEARS",
+    "copyright": "Copyright (c) 2026 NOVA YEARS",
+    "challenge": "NASA Space Apps Challenge 2026"
+  },
+  "credits": [
+    {
+      "name": "NOVA YEARS",
+      "role": "Primary project team",
+      "year": 2026
+    },
+    {
+      "name": "Lunar Mission Simulator",
+      "copyright": "Copyright (c) 2026 NOVA YEARS",
+      "license": "MIT",
+      "license_file": "assets/lunar-mission-simulator/LICENSE",
+      "dependency_notices": "assets/lunar-mission-simulator/THIRD_PARTY_NOTICES.md"
+    },
+    {
+      "name": "NASA lunar imagery, topography, and 3D model",
+      "source_details": "assets/lunar-mission-simulator/assets/NASA-LUNAR-DATA-SOURCES.txt"
+    },
+    {
+      "name": "NASA mission-design and challenge references",
+      "source_catalog": "resource-catalog.js",
+      "additional_references": "README.md"
+    }
+  ],
+  "dependency_metadata": {
+    "manifest": "assets/lunar-mission-simulator/package.json",
+    "lockfile": "assets/lunar-mission-simulator/package-lock.json"
+  },
+  "si_disclosure": {
+    "tools_used": [
+      "ChatGPT",
+      "an AI coding assistant"
+    ],
+    "used_for": {
+      "ChatGPT": "Brainstorming project ideas, finding and summarizing sources, and explaining implementation concepts (for example, how function calls and 3D web visualization work) so the team could write the code themselves.",
+      "AI coding assistant": "Final project cleanup, packaging, and drafting the disclosure text."
+    },
+    "human_authorship": "The team selected the challenge, defined the concept and engineering logic, wrote the game code, and tested and verified it. AI output was used as guidance and reviewed by the team."
+  }
+}

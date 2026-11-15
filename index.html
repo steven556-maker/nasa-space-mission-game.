@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOVA YEARS | NOVA Space Mission Design Game</title>
+<meta name="author" content="NOVA YEARS">
+<meta name="si-disclosure" content="ChatGPT was used for brainstorming, finding and summarizing sources, and explaining implementation concepts such as function calls and 3D web visualization. An AI coding assistant was used for final cleanup, packaging, and drafting the disclosure. The team chose the challenge, designed the concept, wrote and tested the game code.">
+<meta name="description" content="NOVA is an educational lunar mission design game by NOVA YEARS for the NASA Space Apps Challenge 2026.">
+<meta property="og:site_name" content="NOVA YEARS">
+<meta property="og:title" content="NOVA | Space Mission Design Game">
+<meta property="og:description" content="Design a lunar mission, balance simplified resources, and explore its flight phases.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+<div class="stage" id="stage" aria-hidden="true"></div>
+
+<div class="hud" id="hud" dir="ltr" lang="en">
+  <header class="top">
+    <div class="brand"><b>NOVA</b><span id="brandSub">Space Mission Design Game</span></div>
+  </header>
+
+  <main class="hero">
+    <div>
+      <h1 id="heroT" class="swap">Design your mission.<br>Live the consequences.</h1>
+      <p class="sub" id="subT">Every choice trades mass, budget and energy. Press to begin.</p>
+    </div>
+  </main>
+
+  <footer class="bottom">
+    <div class="cta">
+      <div class="intro-control" id="introControl" role="group" aria-label="Choose launch control mode"><b id="introControlLabel">Choose your launch control</b><button id="introManual" type="button" aria-pressed="false">Manual</button><button id="introAuto" type="button" aria-pressed="false">Autopilot</button></div>
+      <span class="intro-control-hint" id="introControlHint" role="status" aria-live="polite"></span>
+      <button class="hold game" id="hold" type="button" disabled>
+        <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+        <span id="holdLabel">Preparing the scene…</span>
+      </button>
+      <button class="link" id="quick" type="button" disabled hidden>Skip</button>
+    </div>
+    <div class="facts">
+      <div><span class="k" id="f1k">Resources to balance</span><span class="v">7<span class="u" id="f1u">types</span></span></div>
+      <div><span class="k" id="f2k">Mission phases</span><span class="v">9<span class="u" id="f2u">stages</span></span></div>
+    </div>
+    <small class="team-credit">NOVA YEARS · NASA Space Apps Challenge 2026</small>
+  </footer>
+
+  <div class="msg" id="msg" role="status" aria-live="polite"><span id="msgT"></span><span id="msgA"></span></div>
+</div>
+
+<div class="tools" id="tools" dir="ltr">
+  <button class="tool" id="snd" type="button" aria-label="Sound on" aria-pressed="true">
+    <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12"/></svg>
+    <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="M16 9l5 6M21 9l-5 6"/></svg>
+  </button>
+  <button class="tool" id="lang" type="button" lang="ar" aria-label="العربية">عربي</button>
+</div>
+
+<div class="flash" id="flash"></div>
+<div class="dust" id="dust"></div>
+
+<section class="envsel" id="envSel" dir="ltr" lang="en" role="dialog" aria-modal="true" aria-labelledby="envH">
+  <div class="envbox">
+    <div class="envhead">
+      <p class="env-eye">MISSION CONTROL / TASK SELECT</p>
+      <h3 id="envH">Lunar missions</h3>
+      <p id="envP">Choose a mission path. Each choice sets the mission objective and resource trade-offs.</p>
+    </div>
+    <div class="moon-map-layout">
+      <div class="moon-map-frame">
+        <canvas id="moonMap" aria-label="Interactive illustrative 3D lunar map. Drag to rotate; select a glowing mission marker."></canvas>
+        <div class="map-stamp" id="mapStamp">ILLUSTRATIVE TERRAIN · NOT A SITE SURVEY</div>
+        <div class="map-help" id="mapHelp">Drag to rotate · Tap a marker or choose a region</div>
+      </div>
+      <aside class="map-panel">
+        <p class="map-panel-kicker" id="mapKicker">MISSION AREA</p>
+        <h4 id="mapSelectedName">South-pole orbital survey</h4>
+        <p id="mapSelectedDesc">Map a shadowed polar region from orbit. Terrain and illumination values are illustrative training data.</p>
+      <div class="map-risk-row"><span id="mapRiskLabel">Illustrative risk</span><b id="mapRisk" class="risk-high">HIGH</b></div>
+      <button class="mg-button atlas-open" id="atlasOpen" type="button">Compare all sites · Mission Atlas</button>
+        <div class="map-costs" id="mapCosts"></div>
+        <div class="map-legend" id="mapLegend"><span><i class="safe"></i>Lower risk</span><span><i class="mid"></i>Moderate</span><span><i class="high"></i>Higher risk</span></div>
+        <div class="envgrid" id="envGrid" role="group" aria-label="Mission regions"></div>
+      </aside>
+    </div>
+    <p class="map-footnote"><span id="mapFootnoteText">The 3D Moon uses imagery and topography from NASA's Lunar Reconnaissance Orbiter. Site markers are illustrative, not measured coordinates.</span> <a href="https://svs.gsfc.nasa.gov/14959/" target="_blank" rel="noopener">NASA LRO Moon model</a> · <a href="https://nasa.github.io/mission-viz/" target="_blank" rel="noopener">NASA Mission Viz</a> · <a href="https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/?tab=resources" target="_blank" rel="noopener">Challenge resources</a></p>
+    <div class="envfoot">
+      <button class="startgame" id="envStart" type="button">Start game</button>
+    </div>
+  </div>
+</section>
+<section class="atlas-panel" id="atlasPanel" role="dialog" aria-modal="true" aria-labelledby="atlasTitle" hidden>
+  <div class="atlas-card"><header><div><small>MISSION ATLAS / ILLUSTRATIVE TRAINING MODEL</small><h2 id="atlasTitle">Same rules, different local conditions</h2></div><button id="atlasClose" type="button" aria-label="Close atlas">×</button></header><p id="atlasNote">Site budget, daylight, and terrain modifiers are simplified game values. Lunar surface gravity is shown as the same approximate mean value for each site; it does not vary materially at this map scale.</p><div id="atlasTable"></div></div>
+</section>
+
+<section class="mission-game" id="missionGame" aria-live="polite">
+  <div class="mg-wrap">
+    <header class="mg-head"><div><p class="mg-kicker" id="mgKicker">NOVA / MISSION ARCHITECT</p><h2 id="mgTitle">Mission briefing</h2><p id="mgObjective"></p><div class="mg-modes"><label><span id="mgDifficultyLabel">Difficulty</span><select id="mgDifficulty"><option value="easy">Guided</option><option value="standard" selected>Standard</option><option value="hard">Tight resources</option></select></label><label class="mg-sandbox-label"><input id="mgSandbox" type="checkbox"><span id="mgSandboxText">Sandbox · limits are advisory</span></label></div></div><div class="mg-head-actions"><button class="mg-guide-open mg-change-mission" id="mgChangeMission" type="button"><span aria-hidden="true">←</span><b id="mgChangeMissionLabel">Change mission</b></button><button class="mg-guide-open" id="mgGuideOpen" type="button" aria-haspopup="dialog" aria-controls="mgGuide" aria-expanded="false"><span aria-hidden="true">?</span><b id="mgGuideOpenLabel">Game guide</b></button></div></header>
+    <section class="mg-generator-panel" id="mgGeneratorPanel" aria-labelledby="mgGeneratorTitle">
+      <div class="mg-generator-copy"><small id="mgGeneratorKicker">MISSION SCENARIO BUILDER</small><h3 id="mgGeneratorTitle">Start with a complete lunar scenario</h3><p id="mgGeneratorHelp">Builds from your selected mission path and site, then gives you a science goal, constraints, and simplified resource limits to design against.</p><span class="mg-generator-source" id="mgGeneratorSource">Local scenario · NASA resource guidance · game values</span></div>
+      <button class="mg-build-button" id="mgBuildMission" type="button"><span class="mg-build-icon" aria-hidden="true">✦</span><span><b id="mgBuildLabel">Generate mission</b><small id="mgBuildNote">Ready to design</small></span><span class="mg-build-arrow" aria-hidden="true">↗</span></button>
+      <p class="mg-generator-status" id="mgGeneratorStatus" role="status" aria-live="polite"></p>
+    </section>
+    <div class="mg-brief" id="mgBrief"></div>
+    <section class="mg-sdgs" aria-labelledby="sdgTitle">
+      <header><small id="sdgKicker">SUSTAINABLE DEVELOPMENT GOALS · LEARNING CONNECTION</small><h3 id="sdgTitle">How mission design connects to sustainable development</h3></header>
+      <div class="mg-sdg-grid">
+        <article><b><a id="sdg4Title" href="https://sdgs.un.org/goals/goal4" target="_blank" rel="noopener">SDG 4 · Quality education</a></b><p id="sdg4">Practice systems thinking by making a mission design, seeing its consequences, and learning from the result.</p></article>
+        <article><b><a id="sdg9Title" href="https://sdgs.un.org/goals/goal9" target="_blank" rel="noopener">SDG 9 · Industry, innovation and infrastructure</a></b><p id="sdg9">Explore how spacecraft, instruments, communications, and ground systems work together as an engineered system.</p></article>
+        <article><b><a id="sdg12Title" href="https://sdgs.un.org/goals/goal12" target="_blank" rel="noopener">SDG 12 · Responsible consumption and production</a></b><p id="sdg12">Compare science return with limited simulated mass, power, data, time, and budget, and explain each trade-off.</p></article>
+      </div>
+      <p class="mg-sdg-note" id="sdgNote">This is an educational connection to the SDGs, not a claim that a lunar game directly achieves or measures these goals. NOVA resource values are simplified game values.</p>
+    </section>
+    <section class="mg-goals" aria-labelledby="mgGoalsTitle"><header><div><small>SCIENCE FIRST · SIMPLIFIED GAME MODEL</small><h3 id="mgGoalsTitle">Choose your science goals</h3></div><span id="mgGoalsNote"></span></header><div class="mg-goal-list" id="mgGoalList"></div></section>
+    <section class="mg-station" aria-label="Six mission design stations"><header><small id="mgStationKicker">MISSION ARCHITECT · STATION 1 OF 6</small><b id="mgStationName">Launch lab</b></header><div class="mg-station-track" id="mgStationTrack"></div><div class="mg-station-controls"><button id="mgStationBack" type="button">Previous station</button><span id="mgStationChoice">Choose one option to continue.</span><button id="mgStationNext" type="button">Next station</button></div></section>
+    <div class="mg-groups" id="mgGroups"></div>
+    <div class="mg-stats" id="mgStats" aria-live="polite"></div>
+    <div class="mg-progress" id="mgProgress"></div>
+    <section class="mg-tradeoff"><header><div><small>LIVE TRADE-OFF MAP · SIMPLIFIED</small><h3 id="mgTradeTitle">Decision impact</h3></div><span id="mgTradeSummary"></span></header><div id="mgTradeGrid"></div><p id="mgDecisionTip"></p></section>
+    <div class="mg-actions"><button class="mg-run" id="mgRun" type="button">Evaluate mission</button><button class="mg-run" id="mgRetry" type="button" hidden>Redesign this scenario</button><span class="mg-control-label" id="mgControlLabel" hidden>Choose control mode before launch:</span><button class="mg-run" id="mgManual" type="button" hidden>Manual control at launch</button><button class="mg-run secondary" id="mgAuto" type="button" hidden>Autopilot at launch</button><button class="mg-run secondary" id="mgSave" type="button" hidden>Save report</button><button class="mg-run secondary" id="mgPrint" type="button" hidden>Print flight evaluation</button><button class="mg-run secondary" id="mgExport" type="button" hidden>Export design JSON</button><button class="mg-run secondary" id="mgShare" type="button" hidden>Share report</button><button class="mg-run secondary" id="mgCompare" type="button">Compare saved runs</button><span id="mgHint"></span></div>
+    <article class="mg-result" id="mgResult" role="status"></article>
+    <article class="mg-lesson" id="mgLesson" hidden></article>
+    <section class="mg-analogue" id="mgAnalogue" hidden></section>
+    <section class="mg-timeline" id="mgTimeline" hidden aria-live="polite">
+      <header><div><small id="mgTimelineKicker">MISSION CONTROL / LIVE RUN</small><h3 id="mgTimelineTitle">Mission timeline</h3></div><b id="mgTimelineStatus">Ready</b></header>
+      <section class="mg-mission-view" aria-labelledby="mgMissionConceptTitle">
+        <div class="mg-mission-view-head"><div><small id="mgMissionConceptLabel">MISSION CONCEPT</small><h4 id="mgMissionConceptTitle">Lunar science mission</h4><p id="mgMissionConceptText"></p></div><span id="mgMissionRoute"></span></div>
+        <div class="mg-scene-frame"><canvas id="missionScene" aria-label="Illustrative 3D Earth-Moon mission trajectory. The spacecraft marker follows the active timeline phase."></canvas><span id="mgScenePhase">READY</span></div>
+        <p class="mg-scene-note" id="mgSceneNote">Illustrative 3D Earth–Moon route and mission phases. Scale, trajectory, and timing are simplified for learning, not navigation.</p>
+      </section>
+      <ol id="mgPhaseList"></ol>
+      <div class="mg-event" id="mgTimelineEvent"></div>
+      <div class="mg-live-head"><small>LIVE RESOURCE TELEMETRY · SIMPLIFIED</small><b id="mgLivePhase">MISSION READY</b></div>
+      <div class="mg-live-resources" id="mgLiveResources"></div>
+      <p class="mg-debrief" id="mgDebrief" hidden></p>
+      <div class="mg-timeline-actions"><button class="mg-run secondary" id="mgSaveFinal" type="button">Save mission report</button><button class="mg-run secondary" id="mgTimelineClose" type="button">Close timeline</button></div>
+    </section>
+    <section class="mg-saved" id="mgSaved" hidden></section>
+    <footer class="mg-sources"><b>Learning references</b><span>All NOVA credits, mass units, power units, and fuel units are simplified game values, not NASA hardware specifications.</span><details><summary>How to read the resource model</summary><p>Budget is a game cost cap. Mass includes spacecraft components and the selected route hardware, and must fit both mission and launcher limits. Power compares daily supply with instrument and operations demand. Fuel includes launch, route, and mission operation reserves. Data compares generated science data with the estimated communications return window. Mission time combines transit and operations days.</p><p>NASA’s science mission design guide covers launch, space, ground, and user segments. Mission Viz is a reference for visual communication; this game’s route math remains simplified.</p></details><div><a href="https://www.spaceappschallenge.org/2026/challenges/space-mission-design-game/?tab=resources" target="_blank" rel="noopener">Challenge resources</a><a href="https://www.nasa.gov/wp-content/uploads/2025/04/250323-design-and-develop-science-mission.pdf" target="_blank" rel="noopener">NASA: Design and Develop Science Missions</a><a href="https://nasa.github.io/mission-viz/" target="_blank" rel="noopener">NASA Mission Viz</a><a href="https://www3.nasa.gov/sites/default/files/atoms/files/nasa_csli_cubesat_101_508.pdf" target="_blank" rel="noopener">NASA CubeSat 101</a><a href="https://www.jpl.nasa.gov/edu/resources/lesson-plan/marsbound-mission-to-the-red-planet/" target="_blank" rel="noopener">JPL Marsbound</a><a href="https://science.nasa.gov/solar-system/moon/history-of-lunar-exploration/" target="_blank" rel="noopener">NASA lunar history</a><a href="https://sdgs.un.org/goals/goal4" target="_blank" rel="noopener">UN SDG 4</a><a href="https://sdgs.un.org/goals/goal9" target="_blank" rel="noopener">UN SDG 9</a><a href="https://sdgs.un.org/goals/goal12" target="_blank" rel="noopener">UN SDG 12</a></div></footer>
+  </div>
+  <section class="mg-guide" id="mgGuide" role="dialog" aria-modal="true" aria-labelledby="mgGuideTitle" hidden>
+    <div class="mg-guide-card"><header><div><small id="mgGuideKicker">NOVA / QUICK GUIDE</small><h2 id="mgGuideTitle">Buttons and sections</h2><p id="mgGuideIntro">Use this guide to understand each part of the mission designer.</p></div><button id="mgGuideClose" type="button" aria-label="Close guide">×</button></header><div class="mg-guide-content" id="mgGuideContent"></div></div>
+  </section>
+</section>
+<section class="flight-screen" id="flightScreen" aria-label="Lunar launch and landing simulation">
+  <button class="flight-exit" id="flightExit" type="button">Return to mission</button>
+  <div class="flight-help-wrap">
+    <button class="flight-help-button" id="flightHelpButton" type="button" aria-label="Flight data guide" aria-expanded="false" aria-controls="flightHelpPanel">?</button>
+    <section class="flight-help-panel" id="flightHelpPanel" role="dialog" aria-labelledby="flightHelpTitle" hidden>
+      <header><div><small id="flightHelpKicker">FLIGHT DISPLAY / QUICK KEY</small><h2 id="flightHelpTitle">What do these numbers mean?</h2></div><button id="flightHelpClose" type="button" aria-label="Close flight guide">×</button></header>
+      <div class="flight-help-content" id="flightHelpContent"></div>
+    </section>
+  </div>
+  <aside class="flight-board" id="flightBoard" aria-live="polite">
+    <b id="flightBoardPhase">Launch and ascent</b>
+    <span id="flightBoardRoute"></span>
+    <span id="flightBoardResources"></span>
+    <small id="flightBoardKeys">Click the flight view, then use W/S to steer. Space stages or burns; I confirms orbit insertion.</small>
+    <button id="flightBoardAuto" type="button">Switch to autopilot</button>
+    <button id="flightBoardFocus" type="button">Focus flight controls</button>
+  </aside>
+  <iframe id="flightFrame" title="Launch and landing simulator" allow="fullscreen; gamepad; pointer-lock" allowfullscreen></iframe>
+</section>
+
+<div class="rocket-cursor" id="rocketCursor" aria-hidden="true">
+  <span class="rocket-flame"></span>
+  <svg viewBox="0 0 48 48" focusable="false">
+    <path class="rocket-body" d="M42.7 4.2C34.9 4.8 26 8.9 20.4 14.5c-4.3 4.3-6.6 9.2-7.2 14.4l5.9 5.9c5.2-.6 10.1-2.9 14.4-7.2 5.6-5.6 9.7-14.5 10.3-22.3.1-.7-.4-1.2-1.1-1.1ZM8.8 29.7l-4.1 4.1c-1.8 1.8-2.3 4.4-1.3 6.8l.5 1.2 1.2.5c2.4 1 5 .5 6.8-1.3l4.1-4.1-7.2-7.2Z"/>
+    <path class="rocket-fin" d="m15.5 20.8-8.2 1.1-4.1 7 8.9-.9m14 8.2-1.1 8.2-7 4.1.9-8.9" transform="translate(4 -5)"/>
+    <ellipse class="rocket-nozzle" cx="7.2" cy="38.6" rx="2.35" ry="1.15" transform="rotate(45 7.2 38.6)"/>
+    <defs>
+      <linearGradient id="rocketHull" x1=".1" y1="1" x2=".9" y2="0"><stop stop-color="#b9c7d1"/><stop offset=".34" stop-color="#eef3f6"/><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="#c7d3dc"/></linearGradient>
+      <radialGradient id="rocketGlass" cx=".28" cy=".22" r=".82"><stop stop-color="#d8fbff"/><stop offset=".18" stop-color="#76d4eb"/><stop offset=".58" stop-color="#2686ad"/><stop offset="1" stop-color="#102d4a"/></radialGradient>
+    </defs>
+    <circle class="rocket-window-rim" cx="26" cy="21.4" r="5.9"/>
+    <circle class="rocket-window" cx="26" cy="21.4" r="4.95"/>
+    <path class="rocket-window-glint" d="M23.4 18.9a3.7 3.7 0 0 1 4.5-.8"/>
+  </svg>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="resource-catalog.js"></script>
+<script src="scenario-generator.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

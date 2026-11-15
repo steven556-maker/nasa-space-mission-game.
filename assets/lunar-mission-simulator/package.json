@@ -1,0 +1,23 @@
+{
+  "name": "lunar-mission-simulator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "smoke": "node scripts/smoke.mjs",
+    "test:autoplay": "node scripts/autoplay-speed.mjs",
+    "test:clarity": "node scripts/clarity.mjs"
+  },
+  "dependencies": {
+    "cannon-es": "^0.20.0",
+    "howler": "^2.2.4",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "vite": "^8.2.2"
+  }
+}

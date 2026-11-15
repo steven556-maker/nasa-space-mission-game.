@@ -1,0 +1,18 @@
+NOVA lunar globe data sources
+
+Primary interactive Moon model
+NASA Goddard Scientific Visualization Studio, “Moon 3D Models for Web, AR, and Animation,” moon_small.glb.
+NASA states that the models use Lunar Reconnaissance Orbiter imagery and topographic data. This web-ready mesh and embedded texture power the NOVA site-selection globe.
+https://svs.gsfc.nasa.gov/14959/
+
+Surface imagery
+NASA Scientific Visualization Studio, CGI Moon Kit (2019 color map), lroc_color_2k.jpg.
+Derived from the LRO Lunar Reconnaissance Orbiter Camera (LROC) Hapke-normalized Wide Angle Camera mosaic.
+https://svs.gsfc.nasa.gov/4720/
+
+Elevation / geometry
+NASA Scientific Visualization Studio, CGI Moon Kit, ldem_4_uint.tif (global LOLA elevation, 4 pixels per degree, unsigned 16-bit).
+The NASA source encodes elevation in half-meters with an offset of +20,000. The app preserves each source 16-bit sample losslessly as two 8-bit PNG channels and maps the decoded measurements onto the sphere using the 1,737,400 m reference radius.
+https://svs.gsfc.nasa.gov/4720/
+
+The orbital Earth–Moon visualization in the bundled flight simulator uses the LROC color map and LOLA elevation samples above. The offline landing-training terrain and mission physics remain unchanged.
